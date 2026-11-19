@@ -1,0 +1,75 @@
+/* global vips, expect, cleanup */
+describe('morphology', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('countlines', () => {
+    const im = vips.Image.black(100, 100).copy();
+    im.drawLine(255, 0, 50, 100, 50);
+    const nLines = im.countlines('horizontal');
+
+    expect(nLines).to.equal(1);
+  });
+
+  it('labelregions', () => {
+    const im = vips.Image.black(100, 100).copy();
+    im.drawCircle(255, 50, 50, 25, {
+      fill: true
+    });
+    const opts = {
+      segments: true
+    };
+    const mask = im.labelregions(opts);
+
+    expect(opts.segments).to.equal(3);
+    expect(mask.max()).to.equal(2);
+  });
+
+  it('erode', () => {
+    const im = vips.Image.black(100, 100).copy();
+    im.drawCircle(255, 50, 50, 25, {
+      fill: true
+    });
+    const im2 = im.erode([
+      [128, 255, 128],
+      [255, 255, 255],
+      [128, 255, 128]
+    ]);
+
+    expect(im.width).to.equal(im2.width);
+    expect(im.height).to.equal(im2.width);
+    expect(im.bands).to.equal(im2.bands);
+    expect(im.avg()).to.be.above(im2.avg());
+  });
+
+  it('dilate', () => {
+    const im = vips.Image.black(100, 100).copy();
+    im.drawCircle(255, 50, 50, 25, {
+      fill: true
+    });
+    const im2 = im.dilate([
+      [128, 255, 128],
+      [255, 255, 255],
+      [128, 255, 128]
+    ]);
+
+    expect(im.width).to.equal(im2.width);
+    expect(im.height).to.equal(im2.width);
+    expect(im.bands).to.equal(im2.bands);
+    expect(im2.avg()).to.be.above(im.avg());
+  });
+
+  it('rank', () => {
+    const im = vips.Image.black(100, 100).copy();
+    im.drawCircle(255, 50, 50, 25, {
+      fill: true
+    });
+    const im2 = im.rank(3, 3, 8);
+
+    expect(im.width).to.equal(im2.width);
+    expect(im.height).to.equal(im2.width);
+    expect(im.bands).to.equal(im2.bands);
+    expect(im2.avg()).to.be.above(im.avg());
+  });
+});

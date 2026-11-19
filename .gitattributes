@@ -1,0 +1,5 @@
+# Shell scripts can't have CRLF line endings
+*.sh	eol=lf
+
+# Excluded from stats, hidden in diffs
+lib/*	linguist-generated

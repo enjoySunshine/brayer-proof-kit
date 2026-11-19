@@ -1,0 +1,138 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", Arial, "HelveticaNeue-Light", sans-serif;
+    font-size: 13px;
+}
+
+#controls {
+    display: flex;
+}
+
+#controls > fieldset {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 15px;
+    border: 1px solid #999;
+}
+
+.playground-page h1,
+.playground-page footer {
+    margin: 15px;
+    font-family: "Segoe UI Light", "HelveticaNeue-UltraLight", sans-serif;
+    font-weight: 100;
+}
+
+.playground-page h1 {
+    font-size: 1.8em;
+}
+
+.playground-page footer {
+    font-size: 1.2em;
+}
+
+.playground-page #playground,
+.playground-page .typing-container,
+.playground-page .run-container {
+    display: flex;
+}
+
+.playground-page .typing-container,
+.playground-page .run-container {
+    flex: 1;
+    flex-direction: column;
+    padding: 15px;
+}
+
+.playground-page .run-container {
+    margin-top: 20px;
+}
+
+.playground-page .tab-area {
+    height: 20px;
+    border-bottom: 1px solid #999;
+}
+
+.playground-page .tab,
+.playground-page .action {
+    height: 20px;
+    line-height: 20px;
+    border: 1px solid #999;
+    border-bottom: 0;
+    cursor: pointer;
+    padding: 0 8px;
+}
+
+.playground-page .tab {
+    color: #999;
+    float: left;
+}
+
+.playground-page .tab.active {
+    color: black;
+    border-bottom: 1px solid white;
+}
+
+.playground-page .action {
+    float: right;
+    background: transparent;
+}
+
+.playground-page .action.run::before,
+.playground-page .action.share::before {
+    font-size: 10px;
+    margin-right: 5px;
+    vertical-align: top;
+}
+
+.playground-page .action.run::before {
+    content: '\25B6';
+}
+
+.playground-page .action.share::before {
+    content: '\1F30D';
+}
+
+.playground-page .editor-container {
+    border: 1px solid #999;
+    border-top: 0;
+}
+
+/* https://github.com/tholman/github-corners */
+.github-corner svg {
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+
+.github-corner:hover .octo-arm {
+    animation: octocat-wave 560ms ease-in-out;
+}
+
+@keyframes octocat-wave {
+    0%, 100% {
+        transform: rotate(0);
+    }
+    20%, 60% {
+        transform: rotate(-25deg);
+    }
+    40%, 80% {
+        transform: rotate(10deg);
+    }
+}
+
+@media (max-width: 500px) {
+    .github-corner:hover .octo-arm {
+        animation: none;
+    }
+
+    /* biome-ignore lint/style/noDescendingSpecificity: intentional override for mobile */
+    .github-corner .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+    }
+}

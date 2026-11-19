@@ -1,0 +1,220 @@
+/* global vips, expect, cleanup */
+import * as Helpers from './helpers.js';
+
+describe('connection', () => {
+  let globalDeletionQueue;
+
+  let colour;
+  let mono;
+
+  before(() => {
+    colour = vips.Image.jpegload(Helpers.jpegFile);
+    mono = colour.extractBand(1).copy();
+    // we remove the ICC profile: the RGB one will no longer be appropriate
+    mono.remove('icc-profile-data');
+
+    globalDeletionQueue = vips.deletionQueue.splice(0);
+  });
+
+  after(() => {
+    vips.deletionQueue.push(...globalDeletionQueue);
+    cleanup();
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  describe('source', () => {
+    it('newFromFile', () => {
+      const x = vips.Source.newFromFile(Helpers.jpegFile);
+
+      expect(x.filename).to.equal(Helpers.jpegFile);
+    });
+    it('newFromMemory', () => {
+      const data = colour.writeToBuffer('.jpg');
+      const x = vips.Source.newFromMemory(data);
+
+      expect(x.filename).to.equal(undefined);
+    });
+  });
+
+  describe('target', () => {
+    it('newToFile', () => {
+      const filename = vips.Utils.tempName('%s.jpg');
+      const x = vips.Target.newToFile(filename);
+
+      expect(x.filename).to.equal(filename);
+
+      // After PR https://github.com/libvips/libvips/pull/4482 the file
+      // is created lazily, so we no longer need to unlink it here.
+    });
+    it('newToMemory', () => {
+      const x = vips.Target.newToMemory();
+
+      expect(x.filename).to.equal(undefined);
+    });
+  });
+
+  describe('image', () => {
+    describe('newFromSource', () => {
+      it('file', () => {
+        const x = vips.Source.newFromFile(Helpers.jpegFile);
+        const y = vips.Image.newFromSource(x, {
+          access: 'sequential'
+        });
+
+        expect(y.width).to.equal(290);
+        expect(y.height).to.equal(442);
+      });
+      it('memory', () => {
+        const data = colour.writeToBuffer('.jpg');
+        const x = vips.Source.newFromMemory(data);
+        const y = vips.Image.newFromSource(x, {
+          access: 'sequential'
+        });
+
+        expect(y.width).to.equal(290);
+        expect(y.height).to.equal(442);
+      });
+      it('custom', () => {
+        const stream = vips.FS.open(Helpers.jpegFile, 'r');
+
+        const source = new vips.SourceCustom();
+        source.onRead = (length) => {
+          const data = new Uint8Array(length);
+          const bytesRead = vips.FS.read(stream, data, 0, length);
+          return data.subarray(0, bytesRead);
+        };
+        source.onSeek = (offset, whence) =>
+          vips.FS.llseek(stream, offset, whence);
+
+        const image = vips.Image.newFromSource(source, {
+          access: 'sequential'
+        });
+        const image2 = vips.Image.newFromFile(Helpers.jpegFile, {
+          access: 'sequential'
+        });
+
+        expect(image.subtract(image2).abs().max()).to.equal(0);
+
+        vips.FS.close(stream);
+      });
+    });
+    describe('writeToTarget', () => {
+      it('file', () => {
+        const filename = vips.Utils.tempName('%s.jpg');
+
+        const x = vips.Target.newToFile(filename);
+        colour.writeToTarget(x, '.jpg');
+
+        const data = vips.FS.readFile(filename);
+        const data2 = colour.writeToBuffer('.jpg');
+
+        expect(data.byteLength).to.equal(data2.byteLength);
+        expect(data).to.deep.equal(data2);
+
+        vips.FS.unlink(filename);
+      });
+      it('memory', () => {
+        const x = vips.Target.newToMemory();
+        colour.writeToTarget(x, '.jpg');
+        const y = colour.writeToBuffer('.jpg');
+
+        expect(x.getBlob()).to.deep.equal(y);
+      });
+      it('custom', () => {
+        const filename = vips.Utils.tempName('%s.png');
+        const stream = vips.FS.open(filename, 'w');
+
+        let onEndCalled = false;
+
+        const target = new vips.TargetCustom();
+        target.onWrite = data =>
+          vips.FS.write(stream, data, 0, data.length);
+        target.onEnd = () => {
+          vips.FS.close(stream);
+          onEndCalled = true;
+          return 0;
+        };
+
+        let image = vips.Image.newFromFile(Helpers.jpegFile, {
+          access: 'sequential'
+        });
+        image.writeToTarget(target, '.png');
+        expect(onEndCalled).to.equal(true);
+
+        image = vips.Image.newFromFile(Helpers.jpegFile, {
+          access: 'sequential'
+        });
+        const image2 = vips.Image.newFromFile(filename, {
+          access: 'sequential'
+        });
+
+        expect(image.subtract(image2).abs().max()).to.equal(0);
+
+        vips.FS.unlink(filename);
+      });
+    });
+  });
+
+  it('matrix', function () {
+    // Needs matrix connection support
+    if (!Helpers.have('matrixload_source') ||
+      !Helpers.have('matrixsave_target')) {
+      return this.skip();
+    }
+
+    const x = vips.Target.newToMemory();
+    mono.matrixsaveTarget(x);
+    const y = vips.Source.newFromMemory(x.getBlob());
+    const im = vips.Image.matrixloadSource(y);
+
+    expect(im.subtract(mono).abs().max()).to.equal(0);
+  });
+
+  it('csv', function () {
+    // Needs csv connection support
+    if (!Helpers.have('csvload_source') ||
+      !Helpers.have('csvsave_target')) {
+      return this.skip();
+    }
+
+    const x = vips.Target.newToMemory();
+    mono.csvsaveTarget(x);
+    const y = vips.Source.newFromMemory(x.getBlob());
+    const im = vips.Image.csvloadSource(y);
+
+    expect(im.subtract(mono).abs().max()).to.equal(0);
+  });
+
+  it('ppm', function () {
+    // Needs ppm connection support
+    if (!Helpers.have('ppmload_source') ||
+      !Helpers.have('ppmsave_target')) {
+      return this.skip();
+    }
+
+    const x = vips.Target.newToMemory();
+    mono.ppmsaveTarget(x);
+    const y = vips.Source.newFromMemory(x.getBlob());
+    const im = vips.Image.ppmloadSource(y);
+
+    expect(im.subtract(mono).abs().max()).to.equal(0);
+  });
+
+  it('tiff', function () {
+    // Needs tiff connection support
+    if (!Helpers.have('tiffload_source') ||
+      !Helpers.have('tiffsave_target')) {
+      return this.skip();
+    }
+
+    const x = vips.Target.newToMemory();
+    mono.tiffsaveTarget(x);
+    const y = vips.Source.newFromMemory(x.getBlob());
+    const im = vips.Image.tiffloadSource(y);
+
+    expect(im.subtract(mono).abs().max()).to.equal(0);
+  });
+});

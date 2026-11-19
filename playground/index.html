@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>wasm-vips playground</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body class="playground-page">
+<h1>wasm-vips playground</h1>
+
+<section id="controls">
+  <fieldset>
+    <legend>Choose sample</legend>
+    <select id="sample-switcher"></select>
+  </fieldset>
+  <fieldset id="module-enabler">
+    <legend>Enable dynamic modules</legend>
+  </fieldset>
+</section>
+
+<section id="playground"></section>
+
+<footer>
+  <p>
+    This is a playground for experimenting with wasm-vips.
+  </p>
+  <p>
+    All embedded demos are intended to run in the browser that supports <a href="https://caniuse.com/wasm-simd">WebAssembly SIMD</a> and <a href="https://caniuse.com/wf-wasm-exception-handling">WebAssembly Exception Handling</a>.
+    This is present on most major browser engines and is part of <a href="https://web.dev/baseline/2023">Baseline 2023</a>.
+  </p>
+</footer>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

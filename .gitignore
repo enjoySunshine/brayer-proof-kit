@@ -1,0 +1,96 @@
+### Node ###
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+node_modules/
+
+.env
+.env.*
+*.pem
+credentials.json
+
+# Optional npm cache directory
+.npm
+
+### C++ ###
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# GCC coverage testing tool files
+*.gcno
+*.gcda
+*.gcov
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+### CLion ###
+.idea/
+
+# Build output
+build/deps/
+build/target/
+build/enums.cpp
+build/functions.cpp
+build/properties.cpp
+build/vips.d.ts
+lib/*
+playground/dist/
+
+# Build caches
+build/cargo-cache/
+build/ccache/
+build/emcache/
+
+# User-specific stuff
+package-lock.json
+test/bench/images/output*
+
+# Include the runtime and type definitions
+!lib/vips.d.ts
+!lib/vips.js
+!lib/vips-es6.js
+!lib/vips-node.js
+!lib/vips-node.mjs
+!lib/vips.wasm
+!lib/vips-heif.wasm
+!lib/vips-jxl.wasm
+!lib/vips-resvg.wasm
