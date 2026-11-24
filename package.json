@@ -39,9 +39,10 @@
   ],
   "scripts": {
     "build": "docker build -t wasm-vips . && docker run -it --rm -v $(pwd):/src wasm-vips ./build.sh",
-    "test": "npm run test:lint && npm run test:node",
+    "test": "npm run test:lint && npm run test:node && npm run test:render",
     "test:lint": "biome lint",
     "test:node": "npm --prefix test/unit test",
+    "test:render": "node --test test/render/render.test.js",
     "test:web": "serve -c test/unit/serve.json",
     "bench": "npm run bench:node",
     "bench:node": "npm --prefix test/bench test",
